@@ -21,7 +21,7 @@ const createGreeting = async (req, res) => {
     const db = client.db("exercise_2");
     console.log("connected!");
     //adding item to the db
-    const result = await db.collection("greetings").insertOne(req.body);
+    const result = await db.collection("greetings").insertOne(req.body); //THIS GUY
     assert.strictEqual(1, result.insertedCount);
 
     res.status(201).json({ status: 201, data: req.body });
@@ -99,4 +99,29 @@ const getGreetings = async (req, res) => {
     });
 };
 
-module.exports = { getGreeting, getGreetings, createGreeting };
+const deleteGreeting = async (req, res) => {
+  const _id = req.params._id;
+  //create new client
+  const client = await MongoClient(MONGO_URI, options);
+  try {
+    //connect to new client
+    await client.connect();
+    //connect to the db
+    const db = client.db("exercise_2");
+    console.log("connected!");
+    //deleting item from the db
+    const result = await db
+      .collection("greetings")
+      .deleteOne({ _id: _id.toUpperCase() });
+    assert.strictEqual(1, result.deletedCount);
+    //console.log(result);
+    res.status(204).json({ status: 204, deletedGreeting: _id });
+  } catch (err) {
+    console.log(err.stack);
+    res.status(500).json({ status: 500, data: req.body, message: err.message });
+  }
+  client.close();
+  console.log("disconnected!");
+};
+
+module.exports = { getGreeting, getGreetings, createGreeting, deleteGreeting };
